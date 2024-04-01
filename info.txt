@@ -1,2 +1,0 @@
-Node version: 21.7.1
-NPM version: 10.5.0
