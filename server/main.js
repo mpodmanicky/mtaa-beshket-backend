@@ -35,7 +35,7 @@ async function db_connect() {
 
 db_connect();
 
-// CRUD - operations
+// CRUD USERS
 
 // CREATE 
 app.post('/users/', upload.array(), async (req, res) => {
@@ -52,7 +52,6 @@ app.post('/users/', upload.array(), async (req, res) => {
         res.status(400).send({});
         console.log(error);
     }
-
 })
 
 
@@ -78,18 +77,21 @@ app.get('/users/:user_id', async (req, res) => {
 })
 
 // UPDATE
-app.put('/users/:user_id', upload.array() , async (req, res) => {
+app.patch('/users/:user_id', upload.array() , async (req, res) => {
    
-    let query = 'UPDATE users SET name = $1, surname = $2, email = $3, password = $4, birth_date = $5  WHERE id = $6 ;';
+    Object.keys(req.body).forEach(async(key) => {
+        
+        let query = `UPDATE users SET ${key} = $1 ;`;
 
-    try{
-        const result = await pool.query(query, [req.body.name, req.body.surname, req.body.email, req.body.password, req.body.birth_date, req.params.user_id]);
+        try{
+            const result = await pool.query(query, [req.body[key]]);
 
-        res.status(200).send({});
-    } catch(error){
-        res.status(400).send({});
-        console.log(error);
-    }
+            res.status(200).send({});
+        } catch(error){
+            res.status(400).send({});
+            console.log(error);
+        }
+    });
 })
 
 // DELETE
@@ -98,6 +100,83 @@ app.delete('/users/:user_id', async (req, res) => {
 
     try{
         const result = await pool.query(query, [req.params.user_id]);
+
+        res.status(200).send({});
+    } catch(error){
+        res.status(400).send({});
+        console.log(error);
+    }
+})
+
+// CRUD - events
+
+// CREATE
+app.post('/events/', upload.array(), async (req, res) => {
+    let query = `   INSERT INTO events(name, interpret, place, date, price,  interpret_id, detail, iamges)
+                    VALUES($1, $2, $3, $4, $5, $6, $7, $8) 
+                    RETURNING id;`
+    try {
+        const result = await pool.query(query, [req.body.name, req.body.interpret, req.body.place, req.body.date, req.body.price, req.body.interpret_id, req.body.detail, req.body.iamges]);
+        
+        res.status(201).send({
+            "id": result.rows[0].id
+        })
+    } catch(error){
+        res.status(400).send({});
+        console.log(error);
+    }
+})
+
+// READ
+app.get('/events/:event_id', async (req, res) => {
+    let query = 'SELECT * FROM events WHERE id = $1 ;';
+    try {
+        const result = await pool.query(query, [req.params.event_id]);
+
+        res.status(200).send({
+            'event': {
+                "id": result.rows[0].id,
+                "name": result.rows[0].name,
+                "interpret": result.rows[0].interpret,
+                "place": result.rows[0].place,
+                "date": result.rows[0].date,
+                "price": result.rows[0].price,
+                "interpret_id": result.rows[0].interpret_id,
+                "detail": result.rows[0].detail,
+                "image": result.rows[0].iamges
+            }
+        })
+    } catch(error){
+        res.status(400).send({});
+        console.log(error);
+    }
+})
+
+// UPDATE
+app.patch('/events/:event_id', upload.array() , async (req, res) => {
+   
+    Object.keys(req.body).forEach(async(key) => {
+        
+        let query = `UPDATE events SET ${key} = $1 ;`;
+
+        try{
+            const result = await pool.query(query, [req.body[key]]);
+
+            res.status(200).send({});
+        } catch(error){
+            res.status(400).send({});
+            console.log(error);
+        }
+    });
+
+})
+
+// DELETE 
+app.delete('/events/:event_id', async (req, res) => {
+    let query = 'DELETE FROM events WHERE id = $1 ;'
+
+    try{
+        const result = await pool.query(query, [req.params.event_id]);
 
         res.status(200).send({});
     } catch(error){
