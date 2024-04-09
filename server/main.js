@@ -185,9 +185,9 @@ app.delete('/events/:event_id', async (req, res) => {
     }
 })
 
+
+
+
 app.listen(3000, 'localhost', () => {
     console.log(`Application listen at port: 3000`)
 })
-
-
-
