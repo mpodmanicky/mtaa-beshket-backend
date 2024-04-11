@@ -48,7 +48,7 @@ app.post('/users/', upload.array(), async (req, res) => {
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){
+    } catch(error){ 
         res.status(400).send({'error': 'Not suitable data'});
         console.log(error);
     }
@@ -117,7 +117,7 @@ app.delete('/users/:user_id', async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({});
+        res.status(400).send({error: "No users with such id"});
         console.log(error);
     }
 })
@@ -160,7 +160,7 @@ app.get('/events/:event_id', async (req, res) => {
             }
         })
     } catch(error){
-        res.status(400).send({});
+        res.status(400).send({"error": "No event with this id"});
         console.log(error);
     }
 })
@@ -177,7 +177,7 @@ app.patch('/events/:event_id', upload.array() , async (req, res) => {
 
             res.status(200).send({});
         } catch(error){
-            res.status(400).send({});
+            res.status(400).send({"error": "Bad parameters"});
             console.log(error);
         }
     });
@@ -208,7 +208,7 @@ app.delete('/events/:event_id', async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({});
+        res.status(400).send({"error": "No user with such id"});
         console.log(error);
     }
 })
@@ -239,6 +239,58 @@ app.get('/events', async (req, res) => {
         res.status(200).send({events: events});
     } catch(error){
         res.status(400).send({"error": "Bad request"});
+        console.log(error);
+    }
+})
+
+// MESSAGES
+
+// CREATE
+app.post('/messages/', upload.array(), async (req, res) => {
+    let query = `   INSERT INTO messages(id, owner_id, chat_id, "text", created_at, updated_at)
+                    VALUES(uuid_generate_v4(), $1, $2, $3, NOW(), NOW() )
+                    RETURNING id;`
+    try {
+        const result = await pool.query(query, [req.body.owner_id, req.body.chat_id, req.body.text]);
+        
+        res.status(201).send({
+            "id": result.rows[0].id
+        })
+    } catch(error){
+        res.status(400).send({error: "Bad request"});
+        console.log(error);
+    }
+})
+
+app.get('/messages/:message_id', async (req, res) => {
+    let query = `SELECT * FROM messages WHERE id = $1`;
+
+    try {
+        const result = await pool.query(query, [req.params.message_id]);
+
+        res.status(200).send({
+            'message': {
+                "id": result.rows[0].id,
+                "owner_id": result.rows[0].owner_id,
+                "chat_id": result.rows[0].chat_id,
+                "text": result.rows[0].text
+            }
+        })
+    } catch(error){
+        res.status(400).send({"error": "No event with this id"});
+        console.log(error);
+    }
+})
+
+app.delete('/messages/:message_id', async (req, res) => {
+    let query = 'DELETE FROM messages WHERE id = $1 ;'
+
+    try{
+        const result = await pool.query(query, [req.params.message_id]);
+
+        res.status(200).send({});
+    } catch(error){
+        res.status(400).send({"error": "No user with such id"});
         console.log(error);
     }
 })
