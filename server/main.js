@@ -35,7 +35,7 @@ async function db_connect() {
 
 db_connect();
 
-// CRUD USERS
+// USERS
 
 // CREATE 
 app.post('/users/', upload.array(), async (req, res) => {
@@ -71,7 +71,7 @@ app.get('/users/:user_id', async (req, res) => {
             }
         })
     } catch(error){
-        res.status(400).send({"error": "No users with this id"});
+        res.status(404).send({"error": "No users with this id"});
         console.log(error);
     }
 })
@@ -88,7 +88,7 @@ app.patch('/users/:user_id', upload.array() , async (req, res) => {
 
             res.status(200).send({});
         } catch(error){
-            res.status(400).send({"error": "No users with this id "});
+            res.status(404).send({"error": "No users with this id "});
             console.log(error);
         }
     });
@@ -103,7 +103,7 @@ app.put('/users/:user_id', upload.array(), async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({"error": "No users with this id "});
+        res.status(404).send({"error": "No users with this id "});
         console.log(error);
     }
 })
@@ -117,12 +117,12 @@ app.delete('/users/:user_id', async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({error: "No users with such id"});
+        res.status(404).send({error: "No users with such id"});
         console.log(error);
     }
 })
 
-// CRUD - events
+// EVENTS
 
 // CREATE
 app.post('/events/', upload.array(), async (req, res) => {
@@ -160,7 +160,7 @@ app.get('/events/:event_id', async (req, res) => {
             }
         })
     } catch(error){
-        res.status(400).send({"error": "No event with this id"});
+        res.status(404).send({"error": "No event with this id"});
         console.log(error);
     }
 })
@@ -194,7 +194,7 @@ app.put('/events/:event_id', upload.array(), async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({"error": "No users with this id "});
+        res.status(404).send({"error": "No users with this id "});
         console.log(error);
     }
 })
@@ -208,7 +208,7 @@ app.delete('/events/:event_id', async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({"error": "No user with such id"});
+        res.status(404).send({"error": "No user with such id"});
         console.log(error);
     }
 })
@@ -257,7 +257,7 @@ app.post('/messages/', upload.array(), async (req, res) => {
             "id": result.rows[0].id
         })
     } catch(error){
-        res.status(400).send({error: "Bad request"});
+        res.status(404).send({error: "Bad request"});
         console.log(error);
     }
 })
@@ -277,7 +277,7 @@ app.get('/messages/:message_id', async (req, res) => {
             }
         })
     } catch(error){
-        res.status(400).send({"error": "No event with this id"});
+        res.status(404).send({"error": "No message with this id"});
         console.log(error);
     }
 })
@@ -290,7 +290,75 @@ app.delete('/messages/:message_id', async (req, res) => {
 
         res.status(200).send({});
     } catch(error){
-        res.status(400).send({"error": "No user with such id"});
+        res.status(404).send({"error": "No message with such id"});
+        console.log(error);
+    }
+})
+
+// IMAGES
+
+// CREATE
+app.post('/images/', upload.array(), async (req, res) => {
+    let query = `   INSERT INTO images(id, url, event_id, created_at, updated_at)
+                    VALUES(uuid_generate_v4(), $1, $2, NOW(), NOW() )
+                    RETURNING id;`
+    try {
+        const result = await pool.query(query, [req.body.url, req.body.event_id]);
+        
+        res.status(201).send({
+            "id": result.rows[0].id
+        })
+    } catch(error){
+        res.status(400).send({error: "Bad request"});
+        console.log(error);
+    }
+})
+
+// GET 
+
+app.get('/images/:image_id', async (req, res) => {
+    let query = `SELECT * FROM images WHERE event_id = $1`;
+
+    try {
+        const result = await pool.query(query, [req.params.image_id]);
+
+        res.status(200).send({
+            'image': {
+                "id": result.rows[0].id,
+                "url": result.rows[0].url,
+                "event_id": result.rows[0].event_id,
+            }
+        })
+    } catch(error){
+        res.status(400).send({"error": "No image with this id"});
+        console.log(error);
+    }
+})
+
+// UPDATE 
+app.put('/images/:image_id', upload.array(), async (req, res) => {
+    let query = 'UPDATE images SET url = $1, event_id = $2 WHERE id = $3 ;';
+
+    try{
+        const result = await pool.query(query, [req.body.url, req.body.event_id, req.params.image_id]);
+
+        res.status(200).send({});
+    } catch(error){
+        res.status(404).send({"error": "No image with this id "});
+        console.log(error);
+    }
+})
+
+// DELETE 
+app.delete('/images/:image_id', async (req, res) => {
+    let query = 'DELETE FROM images WHERE id = $1 ;'
+
+    try{
+        const result = await pool.query(query, [req.params.image_id]);
+
+        res.status(200).send({});
+    } catch(error){
+        res.status(404).send({"error": "No image with such id"});
         console.log(error);
     }
 })
