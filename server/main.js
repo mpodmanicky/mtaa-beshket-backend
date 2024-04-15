@@ -315,7 +315,6 @@ app.post('/images/', upload.array(), async (req, res) => {
 })
 
 // GET 
-
 app.get('/images/:image_id', async (req, res) => {
     let query = `SELECT * FROM images WHERE event_id = $1`;
 
@@ -362,6 +361,63 @@ app.delete('/images/:image_id', async (req, res) => {
         console.log(error);
     }
 })
+
+// TICKETS
+
+// CREATE 
+app.post('/tickets/', upload.array(), async (req, res) => {
+    let query = `   INSERT INTO tickets(id, owner_id, event_id, qr_code, privilege, created_at, updated_at)
+                    VALUES(uuid_generate_v4(), $1, $2, $3, $4, NOW(), NOW() )
+                    RETURNING id;`
+    try {
+        const result = await pool.query(query, [req.body.owner_id, req.body.event_id, req.body.qr_code, req.body.privilege]);
+        
+        res.status(201).send({
+            "id": result.rows[0].id
+        })
+    } catch(error){
+        res.status(400).send({error: "Bad request"});
+        console.log(error);
+    }
+})
+
+
+// GET
+app.get('/tickets/:owner_id', async (req, res) => {
+    let query = `SELECT * FROM tickets WHERE owner_id = $1`;
+
+    try {
+        const result = await pool.query(query, [req.params.owner_id]);
+
+        res.status(200).send({
+            'image': {
+                "id": result.rows[0].id,
+                "owner_id": result.rows[0].url,
+                "event_id": result.rows[0].event_id,
+                "qr_code": result.rows[0].qr_code,
+                "privilege": result.rows[0].privilege
+            }
+        })
+    } catch(error){
+        res.status(400).send({"error": "No user with this id"});
+        console.log(error);
+    }
+})
+
+// DELETE
+app.delete('/tickets/:ticket_id', async (req, res) => {
+    let query = 'DELETE FROM tickets WHERE id = $1 ;'
+
+    try{
+        const result = await pool.query(query, [req.params.ticket_id]);
+
+        res.status(200).send({});
+    } catch(error){
+        res.status(404).send({"error": "No image with such id"});
+        console.log(error);
+    }
+})
+
 
 app.listen(3000, 'localhost', () => {
     console.log(`Application listen at port: 3000`)
