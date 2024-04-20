@@ -55,6 +55,18 @@ app.post('/admin', async (req, res) => {
     }
 });
 
+// POST from temporary database
+app.get('/temp/events', async (req, res) => {
+    const events = JSON.parse(require('fs').readFileSync('temporary_database/events.json'));
+    res.status(200).send(events);
+});
+
+// POST from temporary users
+app.get('/temp/users', async (req, res) => {
+    const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
+    res.status(200).send(users);
+});
+
 // USERS
 
 // CREATE 

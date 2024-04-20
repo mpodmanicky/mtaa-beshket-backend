@@ -1,0 +1,34 @@
+[
+    {
+        "name": "Art Exhibition: Van Gogh's Masterpieces",
+        "date": "2024-05-10",
+        "location": "City Museum of Art",
+        "image_url": "https://example.com/van_gogh_exhibition.jpg",
+        "description": "Explore the brilliance of Vincent van Gogh in this captivating exhibition featuring his most iconic works.",
+        "price": 15.00
+    },
+    {
+        "name": "Live Music Night: Jazz & Blues Fusion",
+        "date": "2024-06-15",
+        "location": "The Underground Club",
+        "image_url": "https://example.com/jazz_blues_night.jpg",
+        "description": "Get ready for a night of soulful sounds with a fusion of jazz and blues performed by local talents.",
+        "price": 10.00
+    },
+    {
+        "name": "Food Festival: A Taste of the World",
+        "date": "2024-07-20",
+        "location": "Central Park",
+        "image_url": "https://example.com/food_festival.jpg",
+        "description": "Embark on a culinary adventure around the globe with delicious food stalls representing diverse cuisines.",
+        "price": "Free"
+    },
+    {
+        "name": "Film Screening: Classic Movie Night",
+        "date": "2024-08-25",
+        "location": "Retro Cinema",
+        "image_url": "https://example.com/classic_movie_night.jpg",
+        "description": "Relive the golden age of cinema with a screening of timeless classics from Hollywood's heyday.",
+        "price": 8.00
+    }
+]
