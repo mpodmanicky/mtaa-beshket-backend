@@ -20,7 +20,7 @@ require('dotenv').config({
 
 
 // conection 
-const {Pool} = require('pg');
+const { Pool } = require('pg');
 const pool = new Pool({
     user: process.env.USER,
     host: process.env.HOST,
@@ -33,7 +33,27 @@ async function db_connect() {
     const client = await pool.connect();
 }
 
-db_connect();
+// db_connect();
+
+// TEST...<Martin Podmanicky>
+app.get('/test', async (req, res) => {
+    console.log('Request recieved...');
+    res.status(200).send({ message: "Hello World!" });
+});
+
+// Admin login <Martin Podmanicky>
+app.get('/admin', async (req, res) => {
+    const email = req.query.email;
+    const password = req.query.password;
+
+    if (email === 'admin@admin.com' && password === 'adminadmin') {
+        console.log('Logged in!');
+        res.status(200).send({ username: "admin" });
+    } else {
+        console.log('Login failed!');
+        res.status(401).send({ message: "Login failed!" });
+    }
+});
 
 // USERS
 
@@ -44,12 +64,12 @@ app.post('/users/', upload.array(), async (req, res) => {
                     RETURNING id;`
     try {
         const result = await pool.query(query, [req.body.name, req.body.surname, req.body.email, req.body.password, req.body.birth_date, req.body.isInterpret]);
-        
+
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){ 
-        res.status(400).send({'error': 'Not suitable data'});
+    } catch (error) {
+        res.status(400).send({ 'error': 'Not suitable data' });
         console.log(error);
     }
 })
@@ -70,25 +90,25 @@ app.get('/users/:user_id', async (req, res) => {
                 "birth_date": result.rows[0].born_at
             }
         })
-    } catch(error){
-        res.status(404).send({"error": "No users with this id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No users with this id" });
         console.log(error);
     }
 })
 
 // UPDATE
-app.patch('/users/:user_id', upload.array() , async (req, res) => {
-   
-    Object.keys(req.body).forEach(async(key) => {
-        
+app.patch('/users/:user_id', upload.array(), async (req, res) => {
+
+    Object.keys(req.body).forEach(async (key) => {
+
         let query = `UPDATE users SET ${key} = $1 WHERE id = $2 ;`;
 
-        try{
+        try {
             const result = await pool.query(query, [req.body[key], req.params.user_id]);
 
             res.status(200).send({});
-        } catch(error){
-            res.status(404).send({"error": "No users with this id "});
+        } catch (error) {
+            res.status(404).send({ "error": "No users with this id " });
             console.log(error);
         }
     });
@@ -98,12 +118,12 @@ app.patch('/users/:user_id', upload.array() , async (req, res) => {
 app.put('/users/:user_id', upload.array(), async (req, res) => {
     let query = 'UPDATE users SET firstname = $1, lastname = $2, email = $3, password = $4, born_at = $5, "isInterpret" = $6, image_id = $7 WHERE id = $8 ;';
 
-    try{
+    try {
         const result = await pool.query(query, [req.body.firstname, req.body.lastname, req.body.email, req.body.password, req.body.born_at, req.body.isInterpret, req.body.image_id, req.params.user_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No users with this id "});
+    } catch (error) {
+        res.status(404).send({ "error": "No users with this id " });
         console.log(error);
     }
 })
@@ -112,12 +132,12 @@ app.put('/users/:user_id', upload.array(), async (req, res) => {
 app.delete('/users/:user_id', async (req, res) => {
     let query = 'DELETE FROM users WHERE id = $1 ;'
 
-    try{
+    try {
         const result = await pool.query(query, [req.params.user_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({error: "No users with such id"});
+    } catch (error) {
+        res.status(404).send({ error: "No users with such id" });
         console.log(error);
     }
 })
@@ -131,12 +151,12 @@ app.post('/events/', upload.array(), async (req, res) => {
                     RETURNING id;`
     try {
         const result = await pool.query(query, [req.body.name, req.body.interpret_id, req.body.place, req.body.date, req.body.price, req.body.detail, req.body.image_id]);
-        
+
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){
-        res.status(400).send({error: "Bad request"});
+    } catch (error) {
+        res.status(400).send({ error: "Bad request" });
         console.log(error);
     }
 })
@@ -159,25 +179,25 @@ app.get('/events/:event_id', async (req, res) => {
                 "image_id": result.rows[0].image_id
             }
         })
-    } catch(error){
-        res.status(404).send({"error": "No event with this id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No event with this id" });
         console.log(error);
     }
 })
 
 // UPDATE
-app.patch('/events/:event_id', upload.array() , async (req, res) => {
-   
-    Object.keys(req.body).forEach(async(key) => {
-        
+app.patch('/events/:event_id', upload.array(), async (req, res) => {
+
+    Object.keys(req.body).forEach(async (key) => {
+
         let query = `UPDATE events SET ${key} = $1 WHERE id = $2;`;
 
-        try{
+        try {
             const result = await pool.query(query, [req.body[key], req.params.event_id]);
 
             res.status(200).send({});
-        } catch(error){
-            res.status(400).send({"error": "Bad parameters"});
+        } catch (error) {
+            res.status(400).send({ "error": "Bad parameters" });
             console.log(error);
         }
     });
@@ -189,12 +209,12 @@ app.patch('/events/:event_id', upload.array() , async (req, res) => {
 app.put('/events/:event_id', upload.array(), async (req, res) => {
     let query = 'UPDATE events SET name = $1, interpret_id = $2, place = $3, date = $4, price = $5, detail = $6, image_id = $7 WHERE id = $8 ;';
 
-    try{
+    try {
         const result = await pool.query(query, [req.body.name, req.body.interpret_id, req.body.place, req.body.date, req.body.price, req.body.date, req.body.image_id, req.params.event_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No users with this id "});
+    } catch (error) {
+        res.status(404).send({ "error": "No users with this id " });
         console.log(error);
     }
 })
@@ -203,12 +223,12 @@ app.put('/events/:event_id', upload.array(), async (req, res) => {
 app.delete('/events/:event_id', async (req, res) => {
     let query = 'DELETE FROM events WHERE id = $1 ;'
 
-    try{
+    try {
         const result = await pool.query(query, [req.params.event_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No user with such id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No user with such id" });
         console.log(error);
     }
 })
@@ -219,26 +239,26 @@ app.get('/events', async (req, res) => {
     let query = 'SELECT * FROM events WHERE LOWER(name) LIKE LOWER($1) OR LOWER(detail) LIKE LOWER($1) ;';
 
     req.query.keyPhrase = `%${req.query.keyPhrase}%`;
-    try{
+    try {
         const result = await pool.query(query, [req.query.keyPhrase]);
 
         let events = [];
 
-        result.rows.forEach( row => {
+        result.rows.forEach(row => {
             let event = {};
             event["id"] = row.id;
             event["name"] = row.name;
-            event["place"]= row.place;
+            event["place"] = row.place;
             event["date"] = row.date;
             event["price"] = row.price;
             event["interpret_id"] = row.interpret_id;
-            event["detail"]= row.detail;
+            event["detail"] = row.detail;
             event["image_id"] = row.image_id;
             events.push(event);
         })
-        res.status(200).send({events: events});
-    } catch(error){
-        res.status(400).send({"error": "Bad request"});
+        res.status(200).send({ events: events });
+    } catch (error) {
+        res.status(400).send({ "error": "Bad request" });
         console.log(error);
     }
 })
@@ -252,12 +272,12 @@ app.post('/messages/', upload.array(), async (req, res) => {
                     RETURNING id;`
     try {
         const result = await pool.query(query, [req.body.owner_id, req.body.chat_id, req.body.text]);
-        
+
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){
-        res.status(404).send({error: "Bad request"});
+    } catch (error) {
+        res.status(404).send({ error: "Bad request" });
         console.log(error);
     }
 })
@@ -276,8 +296,8 @@ app.get('/messages/:message_id', async (req, res) => {
                 "text": result.rows[0].text
             }
         })
-    } catch(error){
-        res.status(404).send({"error": "No message with this id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No message with this id" });
         console.log(error);
     }
 })
@@ -285,12 +305,12 @@ app.get('/messages/:message_id', async (req, res) => {
 app.delete('/messages/:message_id', async (req, res) => {
     let query = 'DELETE FROM messages WHERE id = $1 ;'
 
-    try{
+    try {
         const result = await pool.query(query, [req.params.message_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No message with such id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No message with such id" });
         console.log(error);
     }
 })
@@ -304,12 +324,12 @@ app.post('/images/', upload.array(), async (req, res) => {
                     RETURNING id;`
     try {
         const result = await pool.query(query, [req.body.url, req.body.event_id]);
-        
+
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){
-        res.status(400).send({error: "Bad request"});
+    } catch (error) {
+        res.status(400).send({ error: "Bad request" });
         console.log(error);
     }
 })
@@ -321,22 +341,22 @@ app.get('/images/:image_id', async (req, res) => {
     try {
         const result = await pool.query(query, [req.params.image_id]);
 
-        
+
         let images = [];
 
-        result.rows.forEach( row => {
+        result.rows.forEach(row => {
             let image = {};
             image["id"] = row.id;
             image["url"] = row.url;
             image["event_id"] = row.event_id,
-            images.push(image);
+                images.push(image);
         })
 
         res.status(200).send({
-            'images': images 
+            'images': images
         })
-    } catch(error){
-        res.status(400).send({"error": "No image with this id"});
+    } catch (error) {
+        res.status(400).send({ "error": "No image with this id" });
         console.log(error);
     }
 })
@@ -345,12 +365,12 @@ app.get('/images/:image_id', async (req, res) => {
 app.put('/images/:image_id', upload.array(), async (req, res) => {
     let query = 'UPDATE images SET url = $1, event_id = $2 WHERE id = $3 ;';
 
-    try{
+    try {
         const result = await pool.query(query, [req.body.url, req.body.event_id, req.params.image_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No image with this id "});
+    } catch (error) {
+        res.status(404).send({ "error": "No image with this id " });
         console.log(error);
     }
 })
@@ -359,12 +379,12 @@ app.put('/images/:image_id', upload.array(), async (req, res) => {
 app.delete('/images/:image_id', async (req, res) => {
     let query = 'DELETE FROM images WHERE id = $1 ;'
 
-    try{
+    try {
         const result = await pool.query(query, [req.params.image_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No image with such id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No image with such id" });
         console.log(error);
     }
 })
@@ -378,12 +398,12 @@ app.post('/tickets/', upload.array(), async (req, res) => {
                     RETURNING id;`
     try {
         const result = await pool.query(query, [req.body.owner_id, req.body.event_id, req.body.qr_code, req.body.privilege]);
-        
+
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){
-        res.status(400).send({error: "Bad request"});
+    } catch (error) {
+        res.status(400).send({ error: "Bad request" });
         console.log(error);
     }
 })
@@ -398,21 +418,21 @@ app.get('/tickets/:owner_id', async (req, res) => {
 
         let tickets = [];
 
-        result.rows.forEach( row => {
+        result.rows.forEach(row => {
             let ticket = {};
             ticket["id"] = row.id;
             ticket["owner_id"] = row.url;
             ticket["event_id"] = row.event_id;
-            ticket["qr_code"]= row.qr_code;
-            ticket["privilege"] =  row.privilege;
+            ticket["qr_code"] = row.qr_code;
+            ticket["privilege"] = row.privilege;
             tickets.push(ticket);
         })
 
         res.status(200).send({
             'tickets': tickets
         })
-    } catch(error){
-        res.status(400).send({"error": "No user with this id"});
+    } catch (error) {
+        res.status(400).send({ "error": "No user with this id" });
         console.log(error);
     }
 })
@@ -421,12 +441,12 @@ app.get('/tickets/:owner_id', async (req, res) => {
 app.delete('/tickets/:ticket_id', async (req, res) => {
     let query = 'DELETE FROM tickets WHERE id = $1 ;'
 
-    try{
+    try {
         const result = await pool.query(query, [req.params.ticket_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No image with such id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No image with such id" });
         console.log(error);
     }
 })
@@ -441,12 +461,12 @@ app.post('/chats/', upload.array(), async (req, res) => {
                     RETURNING id;`
     try {
         const result = await pool.query(query, [req.body.owner_id, req.body.event_id, req.body.name, req.description]);
-        
+
         res.status(201).send({
             "id": result.rows[0].id
         })
-    } catch(error){
-        res.status(400).send({error: "Bad request"});
+    } catch (error) {
+        res.status(400).send({ error: "Bad request" });
         console.log(error);
     }
 })
@@ -460,21 +480,21 @@ app.get('/chats/:owner_id', async (req, res) => {
 
         let chats = [];
 
-        result.rows.forEach( row => {
+        result.rows.forEach(row => {
             let chat = {};
             chat["id"] = row.id;
             chat["owner_id"] = row.owner_id;
             chat["event_id"] = row.event_id;
-            chat["name"]= row.name;
-            chat["description"] =  row.description;
+            chat["name"] = row.name;
+            chat["description"] = row.description;
             chats.push(chat);
         })
 
         res.status(200).send({
             'chats': chats
         })
-    } catch(error){
-        res.status(400).send({"error": "No user with this id"});
+    } catch (error) {
+        res.status(400).send({ "error": "No user with this id" });
         console.log(error);
     }
 })
@@ -484,12 +504,12 @@ app.get('/chats/:owner_id', async (req, res) => {
 app.put('/chats/:chat_id', upload.array(), async (req, res) => {
     let query = 'UPDATE chats SET owner_id = $1, event_id = $2, name = $3, description = $4 WHERE id = $5 ;';
 
-    try{
+    try {
         const result = await pool.query(query, [req.body.owner_id, req.body.event_id, req.body.name, req.body.description, req.params.chat_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No chat with this id "});
+    } catch (error) {
+        res.status(404).send({ "error": "No chat with this id " });
         console.log(error);
     }
 })
@@ -498,12 +518,12 @@ app.put('/chats/:chat_id', upload.array(), async (req, res) => {
 app.delete('/chats/:chat_id', async (req, res) => {
     let query = 'DELETE FROM chats WHERE id = $1 ;'
 
-    try{
+    try {
         const result = await pool.query(query, [req.params.chat_id]);
 
         res.status(200).send({});
-    } catch(error){
-        res.status(404).send({"error": "No chat with such id"});
+    } catch (error) {
+        res.status(404).send({ "error": "No chat with such id" });
         console.log(error);
     }
 })
@@ -513,26 +533,26 @@ app.get('/chats', async (req, res) => {
     let query = 'SELECT * FROM chats WHERE LOWER(name) LIKE LOWER($1) OR LOWER(description) LIKE LOWER($1) ;';
 
     req.query.keyPhrase = `%${req.query.keyPhrase}%`;
-    try{
+    try {
         const result = await pool.query(query, [req.query.keyPhrase]);
 
         let chats = [];
 
-        result.rows.forEach( row => {
+        result.rows.forEach(row => {
             let chat = {};
             chat['owner_id'] = row.owner_id;
             chat['event_id'] = row.event_id;
             chat['name'] = row.name;
-            chat['description'] = row.description; 
+            chat['description'] = row.description;
             chats.push(chat);
         })
-        res.status(200).send({'chats': chats});
-    } catch(error){
-        res.status(400).send({"error": "Bad request"});
+        res.status(200).send({ 'chats': chats });
+    } catch (error) {
+        res.status(400).send({ "error": "Bad request" });
         console.log(error);
     }
 })
 
 app.listen(3000, 'localhost', () => {
-    console.log(`Application listen at port: 3000`)
+    console.log(`Server is running on port: 3000`);
 })
