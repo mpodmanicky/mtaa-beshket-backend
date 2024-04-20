@@ -42,11 +42,11 @@ app.get('/test', async (req, res) => {
 });
 
 // Admin login <Martin Podmanicky>
-app.get('/admin', async (req, res) => {
-    const email = req.query.email;
-    const password = req.query.password;
+app.post('/admin', async (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
 
-    if (email === 'admin@admin.com' && password === 'adminadmin') {
+    if (email === 'admin' && password === 'admin') {
         console.log('Logged in!');
         res.status(200).send({ username: "admin" });
     } else {
