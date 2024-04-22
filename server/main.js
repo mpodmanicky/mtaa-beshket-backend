@@ -1,5 +1,7 @@
 const express = require('express');
 const http = require('http');
+const cors = require('cors');
+const { Server } = require('socket.io');
 
 const app = express();
 
@@ -8,7 +10,10 @@ const multer = require('multer');
 const upload = multer();
 const bodyParser = require('body-parser');
 
+const server = http.createServer(app);
+
 app.use(bodyParser.json());
+app.use(cors());
 
 
 // reading enviroment variables
@@ -48,21 +53,26 @@ app.post('/admin', async (req, res) => {
 
     if (email === 'admin' && password === 'admin') {
         console.log('Logged in!');
-        res.status(200).send({ username: "admin" });
-    } else {
-        console.log('Login failed!');
-        res.status(401).send({ message: "Login failed!" });
+        res.status(200).send({ username: "Admin" });
+    } else if (email === 'mitch@gmail.com' && password === 'mitch') {
+        console.log('Logged in!');
+        res.status(200).send({ username: "Mitch" });
+    } else if (email === 'jen@gmail.com' && password === 'jen') {
+        console.log('Logged in!');
+        res.status(200).send({ username: "Jen" });
     }
 });
 
 // POST from temporary database
 app.get('/temp/events', async (req, res) => {
+    console.log('Request for events recieved...');
     const events = JSON.parse(require('fs').readFileSync('temporary_database/events.json'));
     res.status(200).send(events);
 });
 
 // POST from temporary users
 app.get('/temp/users', async (req, res) => {
+    console.log('Request for users recieved...');
     const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
     res.status(200).send(users);
 });
@@ -568,3 +578,27 @@ app.get('/chats', async (req, res) => {
 app.listen(3000, 'localhost', () => {
     console.log(`Server is running on port: 3000`);
 })
+
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000",  // Replace with your client-side origin if different
+    },
+});
+
+io.on('connection', (socket) => {
+    console.log('Client connected');
+
+    // Handle messages and events from the client
+    socket.on('message', (message) => {
+        console.log('Received message:', message);
+        // You can process or broadcast messages here
+    });
+
+    // Handle client disconnection
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+
+    // Optionally, send a welcome message to the client
+    socket.emit('welcome', 'Welcome to the server!');
+});

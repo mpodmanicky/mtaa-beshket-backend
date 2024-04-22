@@ -1,0 +1,32 @@
+[
+    {
+        "from": "Mitch",
+        "to": "Jen",
+        "message": "Hey, how are you doing?"
+    },
+    {
+        "from": "Jen",
+        "to": "Mitch",
+        "message": "I'm doing well, thanks for asking. How about you?"
+    },
+    {
+        "from": "Mitch",
+        "to": "Jen",
+        "message": "I'm doing well too. I was wondering if you wanted to grab lunch sometime this week?"
+    },
+    {
+        "from": "Jen",
+        "to": "Mitch",
+        "message": "Sure, I'd love to. How about Thursday?"
+    },
+    {
+        "from": "Mitch",
+        "to": "Jen",
+        "message": "Sounds good. Let's meet at that new sushi place downtown at 1pm."
+    },
+    {
+        "from": "Jen",
+        "to": "Mitch",
+        "message": "Great, see you then!"
+    }
+]
