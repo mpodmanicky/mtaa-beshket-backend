@@ -12,5 +12,13 @@
         "email": "jane.smith@example.com",
         "password": "password",
         "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+    },
+    {
+        "name": "Martin Podmanicky",
+        "email": "mpodmanicky34@gmail.com",
+        "password": "martin",
+        "passwordConfirm": "martin",
+        "age": 20,
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
     }
 ]

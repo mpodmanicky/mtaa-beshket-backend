@@ -53,6 +53,16 @@ app.post('/admin', async (req, res) => {
     const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
 
     try {
+        if (email === 'admin' && password === 'admin') {
+            console.log('Logged in!');
+            return res.status(200).send({ username: "Admin" });
+        } else if (email === 'mitch@gmail.com' && password === 'mitch') {
+            console.log('Logged in!');
+            return res.status(200).send({ username: "Mitch" });
+        } else if (email === 'jen@gmail.com' && password === 'jen') {
+            console.log('Logged in!');
+            return res.status(200).send({ username: "Jen" });
+        }
         const user = users.find(u => u.email === email);
 
         if (!user) {
@@ -65,23 +75,13 @@ app.post('/admin', async (req, res) => {
         }
 
         console.log('Logged in!');
-        res.status(200).send({ username: user.name });
+        return res.status(200).send({ username: user.name });
 
     } catch (error) {
         console.log(error);
-        res.status(500).send({ message: 'Internal server error' });
+        return res.status(500).send({ message: 'Internal server error' });
     }
 
-    if (email === 'admin' && password === 'admin') {
-        console.log('Logged in!');
-        res.status(200).send({ username: "Admin" });
-    } else if (email === 'mitch@gmail.com' && password === 'mitch') {
-        console.log('Logged in!');
-        res.status(200).send({ username: "Mitch" });
-    } else if (email === 'jen@gmail.com' && password === 'jen') {
-        console.log('Logged in!');
-        res.status(200).send({ username: "Jen" });
-    }
 });
 
 // POST from temporary database
@@ -92,25 +92,49 @@ app.get('/temp/events', async (req, res) => {
 });
 
 // POST from temporary users
-app.get('/temp/users', async (req, res) => {
+app.post('/temp/users', async (req, res) => {
     console.log('Request for users recieved...');
     const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
-    res.status(200).send(users);
+    const withoutMe = users.filter(u => u.name !== req.body.name);
+    res.status(200).send(withoutMe);
 });
 
-app.post('/temp/users', async (req, res) => {
-    const { user } = req.body;
+app.post('/temp/register/users', async (req, res) => {
+    const user = req.body;
+
+    console.log('Request for registration recieved...', user);
 
     const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
+
     if (users.filter(u => u.email === user.email).length === 0) {
-        if (user.password === user.confirmPassword) {
+        if (user.password === user.passwordConfirm) {
+            users.push(user);
             require('fs').writeFileSync('temporary_database/users.json', JSON.stringify(users));
-            res.status(201).send({ message: 'User created' });
+            console.log('Registered!');
+            return res.status(201).send({ message: 'User created' });
         } else {
-            res.status(400).send({ message: 'Passwords do not match' });
+            console.log('Passwords do not match')
+            return res.status(400).send({ message: 'Passwords do not match' });
         }
     } else {
-        res.status(409).send({ message: 'User already exists' });
+        console.log('User already exists');
+        return res.status(409).send({ message: 'User already exists' });
+    }
+});
+
+app.post('/temp/tickets', async (req, res) => {
+    const user = req.body;
+
+    console.log('Request for tickets recieved...', user);
+
+    const tickets = JSON.parse(require('fs').readFileSync('temporary_database/tickets.json'));
+
+    const userTickets = tickets.filter(t => t.owner === user.name);
+
+    if (userTickets.length > 0) {
+        return res.status(200).send(userTickets);
+    } else {
+        return res.status(404).send({ message: 'No tickets found' });
     }
 });
 
