@@ -50,6 +50,27 @@ app.get('/test', async (req, res) => {
 app.post('/admin', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
+    const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
+
+    try {
+        const user = users.find(u => u.email === email);
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        const isValidPassword = user.password === password;
+
+        if (!isValidPassword) {
+            return res.status(400).send({ message: 'Invalid password' });
+        }
+
+        console.log('Logged in!');
+        res.status(200).send({ username: user.name });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: 'Internal server error' });
+    }
 
     if (email === 'admin' && password === 'admin') {
         console.log('Logged in!');
@@ -75,6 +96,22 @@ app.get('/temp/users', async (req, res) => {
     console.log('Request for users recieved...');
     const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
     res.status(200).send(users);
+});
+
+app.post('/temp/users', async (req, res) => {
+    const { user } = req.body;
+
+    const users = JSON.parse(require('fs').readFileSync('temporary_database/users.json'));
+    if (users.filter(u => u.email === user.email).length === 0) {
+        if (user.password === user.confirmPassword) {
+            require('fs').writeFileSync('temporary_database/users.json', JSON.stringify(users));
+            res.status(201).send({ message: 'User created' });
+        } else {
+            res.status(400).send({ message: 'Passwords do not match' });
+        }
+    } else {
+        res.status(409).send({ message: 'User already exists' });
+    }
 });
 
 // USERS
